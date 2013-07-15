@@ -118,6 +118,7 @@ var AdvancedParallaxJS = {
 		this.scrollPosition -= delta > 0 ? 10 : -10;
 		if (this.scrollPosition < 0)
 			this.scrollPosition = 0;
+		if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight)AdvancedParallaxJS.scrollPosition= Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight;
 		this.moveHandle();
 	},
 	scrollerMouseMove : function(event) {
