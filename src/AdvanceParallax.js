@@ -30,7 +30,7 @@ var AdvancedParallaxJS = {
 			Utensil.addListener(window, "resize", function() {
 				root.resize();
 			});
-			
+			document.body.ondragstart=function(e){return false;};
 			this.resize();
 		}
 	},
@@ -99,13 +99,13 @@ var AdvancedParallaxJS = {
 	scrollerMouseDown : function() {
 
 		var root = this;
-		Utensil.addListener(document.body, "mouseup", AdvancedParallaxJS.scrollerMouseUp);
-		Utensil.addListener(document.body, "mousemove", AdvancedParallaxJS.scrollerMouseMove);
+		Utensil.addListener(document, "mouseup", AdvancedParallaxJS.scrollerMouseUp);
+		Utensil.addListener(document, "mousemove", AdvancedParallaxJS.scrollerMouseMove);
 	},
 	scrollerMouseUp : function() {
 
-		Utensil.removeListener(document.body, "mouseup", AdvancedParallaxJS.scrollerMouseUp);
-		Utensil.removeListener(document.body, "mousemove", AdvancedParallaxJS.scrollerMouseMove);
+		Utensil.removeListener(document, "mouseup", AdvancedParallaxJS.scrollerMouseUp);
+		Utensil.removeListener(document, "mousemove", AdvancedParallaxJS.scrollerMouseMove);
 	},
 	mouseLeave : function(event) {
 		if (event.toElement == null && event.relatedTarget == null)
@@ -123,12 +123,13 @@ var AdvancedParallaxJS = {
 	scrollerMouseMove : function(event) {
 		AdvancedParallaxJS.scrollPositionPrevious = AdvancedParallaxJS.scrollPosition;
 		AdvancedParallaxJS.scrollPosition = Utensil.mouseY(document.body, event);
-
+		if(AdvancedParallaxJS.scrollPosition <0)AdvancedParallaxJS.scrollPosition=0;
+if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight)AdvancedParallaxJS.scrollPosition= Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight;
 		AdvancedParallaxJS.moveHandle();
 
 	},
 	moveHandle : function() {
-		this.scrollhandle.style.top = ((this.scrollPosition > Utensil.stageHeight() - this.scrollhandleHeight) ? Utensil.stageHeight() - this.scrollhandleHeight : this.scrollPosition) + "px";
+		this.scrollhandle.style.top = ((this.scrollPosition >= Utensil.stageHeight() - this.scrollhandleHeight) ? Utensil.stageHeight() - this.scrollhandleHeight : this.scrollPosition) + "px";
 		this.moveView();
 	},
 	moveView : function() {
