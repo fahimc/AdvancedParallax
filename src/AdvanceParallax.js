@@ -4,12 +4,19 @@ var AdvancedParallaxJS = {
 	scrollhandleHeight : 20,
 	scrollbarWidth : 20,
 	scrollPosition : 0,
+	scrollPositionPrevious : 0,
 	options : {
 
 	},
 	id : {
 		parallaxHolder : "parallaxHolder"
 	},
+	events : {
+		ON_VIEW_SCROLL_DOWN : "ON_VIEW_SCROLL_DOWN",
+		ON_VIEW_SCROLL_UP : "ON_VIEW_SCROLL_UP",
+		ON_VIEW_CHANGE : "ON_VIEW_CHANGE"
+	},
+	callbacks : [],
 	currentIndex : 0,
 	children : [],
 	init : function() {
@@ -23,9 +30,7 @@ var AdvancedParallaxJS = {
 			Utensil.addListener(window, "resize", function() {
 				root.resize();
 			});
-			Utensil.addListener(window, "scroll", function() {
-				root.onScroll();
-			});
+			
 			this.resize();
 		}
 	},
@@ -64,23 +69,41 @@ var AdvancedParallaxJS = {
 		var mousewheelevt = (/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel"//FF doesn't recognize mousewheel as of FF3.x
 
 		if (document.attachEvent)//if IE (and Opera depending on user setting)
-			document.attachEvent("on" + mousewheelevt,  function(event) {
-			root.mouseWheel(event);
-		});
+			document.attachEvent("on" + mousewheelevt, function(event) {
+				root.mouseWheel(event);
+			});
 		else if (document.addEventListener)//WC3 browsers
-			document.addEventListener(mousewheelevt,  function(event) {
-			root.mouseWheel(event);
-		}, false);
+			document.addEventListener(mousewheelevt, function(event) {
+				root.mouseWheel(event);
+			}, false);
 
 	},
+	addListener : function(viewID, eventName, callback) {
+		if (!this.callbacks[eventName])
+			this.callbacks[eventName] = [];
+		if (!this.callbacks[eventName][viewID])
+			this.callbacks[eventName][viewID] = [];
+		this.callbacks[eventName][viewID].push(callback);
+
+	},
+	removeListener : function(viewID, eventName, callback) {
+		if (!this.events[eventName] && this.events[eventName][viewID])
+			for (var a = 0; a < this.events[eventName][viewID].length; a++) {
+				if (this.events[eventName][viewID][a] == callback) {
+					this.events[eventName][viewID].splice(a, 1);
+					a = this.events[eventName][viewID].length + 1;
+					return;
+				}
+			}
+	},
 	scrollerMouseDown : function() {
-		
+
 		var root = this;
 		Utensil.addListener(document.body, "mouseup", AdvancedParallaxJS.scrollerMouseUp);
 		Utensil.addListener(document.body, "mousemove", AdvancedParallaxJS.scrollerMouseMove);
 	},
 	scrollerMouseUp : function() {
-		
+
 		Utensil.removeListener(document.body, "mouseup", AdvancedParallaxJS.scrollerMouseUp);
 		Utensil.removeListener(document.body, "mousemove", AdvancedParallaxJS.scrollerMouseMove);
 	},
@@ -89,62 +112,102 @@ var AdvancedParallaxJS = {
 			this.scrollerMouseUp(event);
 	},
 	mouseWheel : function(event) {
-		
+
 		var delta = event.detail ? event.detail * (-120) : event.wheelDelta//check for detail first so Opera uses that instead of wheelDelta
-		this.scrollPosition += delta>0?10:-10;
-		if(this.scrollPosition <0)this.scrollPosition =0;
+		this.scrollPositionPrevious = this.scrollPosition;
+		this.scrollPosition += delta > 0 ? 10 : -10;
+		if (this.scrollPosition < 0)
+			this.scrollPosition = 0;
 		this.moveHandle();
 	},
 	scrollerMouseMove : function(event) {
+		AdvancedParallaxJS.scrollPositionPrevious = AdvancedParallaxJS.scrollPosition;
 		AdvancedParallaxJS.scrollPosition = Utensil.mouseY(document.body, event);
 
 		AdvancedParallaxJS.moveHandle();
-		
+
 	},
 	moveHandle : function() {
 		this.scrollhandle.style.top = ((this.scrollPosition > Utensil.stageHeight() - this.scrollhandleHeight) ? Utensil.stageHeight() - this.scrollhandleHeight : this.scrollPosition) + "px";
 		this.moveView();
 	},
-	moveView:function()
-	{
+	moveView : function() {
 		//current position
-		var cpos = this.currentScrollPercentage() *100;
-		
-		
-		for(var a=0;a<this.children.length;a++)
-		{
+		var cpos = this.currentScrollPercentage() * 100;
+
+		for (var a = 0; a < this.children.length; a++) {
 			var child = this.children[a];
-			if(child.getAttribute && child.getAttribute("in"))
-			{
-				var show = Number(child.getAttribute("in"))*100;
-				var end = Number(child.getAttribute("out"))*100;
-				var showPer =((show-(show-cpos))/show);
-				var endPer =((end-(end-cpos))/end);
+			if (child.getAttribute && child.getAttribute("in")) {
+				var show = Number(child.getAttribute("in")) * 100;
+				var end = Number(child.getAttribute("out")) * 100;
+				var showPer = ((show - (show - cpos)) / show);
+				var endPer = ((end - (end - cpos)) / end);
 				// if(child.className=="green")
 				// {
-					// console.log(child.className,cpos,showPer);
-					// console.log(Utensil.stageHeight(),(Utensil.stageHeight() * a),(Utensil.stageHeight() * a)-(Utensil.stageHeight() * a)*showPer);
+				// console.log(child.className,cpos,showPer);
+				// console.log(Utensil.stageHeight(),(Utensil.stageHeight() * a),(Utensil.stageHeight() * a)-(Utensil.stageHeight() * a)*showPer);
 				// }
 				// if(show>0 && showPer<=1 )child.style.top =  (Utensil.stageHeight() * a)-(child.clientHeight *showPer )+"px";
-				if(show>0 && showPer<=1 )child.style.top =  ((Utensil.stageHeight() * a)-(Utensil.stageHeight() * a)*showPer)+"px";
+				if (show > 0 && showPer <= 1) {
+					child.style.top = ((Utensil.stageHeight() * a) - (Utensil.stageHeight() * a) * showPer) + "px";
+				} else if (show == 0) {
+					child.style.top = (Utensil.stageHeight() * 0.001) + "px";
+				}
 				// if(endPer>1)child.style.top =  (Utensil.stageHeight())-(child.clientHeight *endPer )+"px";
-				if(endPer>1)child.style.top =  ((Utensil.stageHeight() * a)-(Utensil.stageHeight() * a)*endPer)+"px";
-				if(showPer>=1)console.log(child.className,showPer);
 				
+				if (endPer > 1 && show > 0) {
+					child.style.top = ((Utensil.stageHeight() * a) - (Utensil.stageHeight() * a) * endPer) + "px";
+				} else if (show == 0 && endPer > 1) {
+					child.style.top = ((Utensil.stageHeight()) * endPer) + "px";
+				}
+				// is SHOWING
+				//if(a==1)console.log(child.id,endPer);
+				if (show <= cpos && cpos<=end && this.scrollPositionPrevious<=this.scrollPosition) {
+					if (this.currentIndex != a) {
+						this.currentIndex = a;
+						this.dispatchEvents(this.events.ON_VIEW_CHANGE,this.id.parallaxHolder, {
+							targetID : child.id,
+							index:this.currentIndex
+						});
+					}
+					this.dispatchEvents(this.events.ON_VIEW_SCROLL_DOWN, child.id, {
+						percentage : endPer.toFixed(2)
+					});
+
+				}
+				// going off screen
+				//if(a==1)console.log(showPer,this.scrollPositionPrevious,this.scrollPosition);
+				if (showPer >= 1  && endPer <=1 && this.scrollPositionPrevious>this.scrollPosition) {
+					this.dispatchEvents(this.events.ON_VIEW_SCROLL_UP, child.id, {
+						percentage : endPer.toFixed(2)
+					});
+
+				}
+
 			}
 		}
 		//this.children[this.currentIndex].style.top = -(this.children[this.currentIndex].clientHeight *per )+"px";
 	},
+	dispatchEvents : function(eventName, viewID, parameters) {
+		
+		if (!this.callbacks[eventName][viewID])
+			return;
+		for (var a = 0; a < this.callbacks[eventName][viewID].length; a++) {
+
+			this.callbacks[eventName][viewID][a](parameters);
+		}
+
+	},
 	setChildren : function(add) {
-		var count=0;
+		var count = 0;
 		for (var a = 0; a < this.holder.childNodes.length; a++) {
 			var child = this.holder.childNodes[a];
 			if (child.tagName && child.tagName == "DIV") {
-				
+
 				child.style.width = (Utensil.stageWidth() - this.scrollbarWidth) + "px";
 				child.style.position = "absolute";
 				child.style.overflow = "hidden";
-				child.style.top = ((count==0)?0:Utensil.stageHeight())  + "px";
+				child.style.top = ((count == 0) ? 0 : Utensil.stageHeight()) + "px";
 				//child.style.zIndex = this.holder.childNodes.length - a;
 				child.style.height = Utensil.stageHeight() + "px";
 				if (add)
@@ -160,10 +223,9 @@ var AdvancedParallaxJS = {
 		// this.holder.style.height = (this.children.length * Utensil.stageHeight()) + "px";
 
 	},
-	
-	
+
 	currentScrollPercentage : function() {
-		
+
 		return Number(this.scrollPosition / (Utensil.stageHeight())).toFixed(2);
 	},
 	resize : function() {

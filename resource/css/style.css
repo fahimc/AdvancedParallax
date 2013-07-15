@@ -14,7 +14,7 @@ body,html
 {
 	width:100%;
 	height:100%;
-	background:url(../image/bg.jpg) #000 center center no-repeat; 
+
 	background-attachment:fixed;
 	font-family: 'Source Sans Pro', sans-serif;
 	font-weight: 300;
@@ -22,9 +22,16 @@ body,html
 }
 
 #parallaxHolder .red
-
 {
+	color:#fff;
 	background-color: #f00;
+}
+#parallaxHolder .red h1
+{
+	width:100%;
+	text-align: center;
+	font-size: 62px;
+	padding-top: 100px;
 }
 
 #parallaxHolder .blue
@@ -42,6 +49,15 @@ body,html
 
 {
 	background-color: #000;
+	color:#fff;
+	
+}
+#parallaxHolder .black h1
+{
+	width:100%;
+	text-align: center;
+	font-size: 62px;
+	padding-top: 100px;
 }
 #parallaxHolder .purple
 
@@ -51,10 +67,26 @@ body,html
 .scroller
 {
 	border: 1px solid 000;
-	background-color: #e4e4e4;
+	background-color: #efefef;
 }
 .scrollerhandle
 {
 	border: 1px solid 000;
-	background-color: #fff;
+	background-color: #cdcdcd;
+	cursor: pointer;
+}
+.contentHolder
+{
+	position: relative;
+	height: 100%;
+	width:100%;
+}
+#box
+{
+	position: absolute;
+	width:100px;
+	height:100px;
+	top:50px;
+	left:50px;
+	background-color: #ccc;
 }
