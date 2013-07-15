@@ -115,7 +115,7 @@ var AdvancedParallaxJS = {
 
 		var delta = event.detail ? event.detail * (-120) : event.wheelDelta//check for detail first so Opera uses that instead of wheelDelta
 		this.scrollPositionPrevious = this.scrollPosition;
-		this.scrollPosition += delta > 0 ? 10 : -10;
+		this.scrollPosition -= delta > 0 ? 10 : -10;
 		if (this.scrollPosition < 0)
 			this.scrollPosition = 0;
 		this.moveHandle();
