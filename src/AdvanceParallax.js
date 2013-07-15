@@ -118,14 +118,14 @@ var AdvancedParallaxJS = {
 		this.scrollPosition -= delta > 0 ? 10 : -10;
 		if (this.scrollPosition < 0)
 			this.scrollPosition = 0;
-		if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight)AdvancedParallaxJS.scrollPosition= Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight;
+		if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight)AdvancedParallaxJS.scrollPosition= Utensil.stageHeight();
 		this.moveHandle();
 	},
 	scrollerMouseMove : function(event) {
 		AdvancedParallaxJS.scrollPositionPrevious = AdvancedParallaxJS.scrollPosition;
 		AdvancedParallaxJS.scrollPosition = Utensil.mouseY(document.body, event);
 		if(AdvancedParallaxJS.scrollPosition <0)AdvancedParallaxJS.scrollPosition=0;
-if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight)AdvancedParallaxJS.scrollPosition= Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight;
+if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight)AdvancedParallaxJS.scrollPosition= Utensil.stageHeight() ;
 		AdvancedParallaxJS.moveHandle();
 
 	},
