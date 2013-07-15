@@ -24,26 +24,41 @@ body,html
 #parallaxHolder .red
 {
 	color:#fff;
-	background-color: #f00;
+	background:url(../image/intro_1.jpg) center center #f00;
 }
 #parallaxHolder .red h1
 {
 	width:100%;
 	text-align: center;
 	font-size: 62px;
-	padding-top: 100px;
+	position: absolute;
+	
 }
 
 #parallaxHolder .blue
 
 {
-	background-color: #00f;
+	background:url(../image/horizontal_1.jpg) center center;
 }
-
+#cardetail
+{
+	position: absolute;
+	background:url(../image/detail_1.jpg) center center;
+	width:15%;
+	height:100%;
+}
 #parallaxHolder .green
 
 {
-	background-color: #0f0;
+	background-color: #000;
+}
+#victoria
+{
+	position:absolute;
+	background:url(../image/1.png) center center;
+	width: 520px;
+	height:100%;
+	top:100px;
 }
 #parallaxHolder .black
 

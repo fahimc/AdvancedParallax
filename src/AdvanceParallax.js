@@ -151,19 +151,19 @@ if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJ
 				// }
 				// if(show>0 && showPer<=1 )child.style.top =  (Utensil.stageHeight() * a)-(child.clientHeight *showPer )+"px";
 				if (show > 0 && showPer <= 1) {
-					child.style.top = ((Utensil.stageHeight() * a) - (Utensil.stageHeight() * a) * showPer) + "px";
+					child.style.top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1)) * showPer) + "px";
 				} else if (show == 0) {
 					child.style.top = (Utensil.stageHeight() * 0.001) + "px";
 				}
 				// if(endPer>1)child.style.top =  (Utensil.stageHeight())-(child.clientHeight *endPer )+"px";
 				
 				if (endPer > 1 && show > 0) {
-					child.style.top = ((Utensil.stageHeight() * a) - (Utensil.stageHeight() * a) * endPer) + "px";
+					child.style.top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1)) * endPer) + "px";
 				} else if (show == 0 && endPer > 1) {
-					child.style.top = ((Utensil.stageHeight()) * endPer) + "px";
+					child.style.top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1)) * endPer) + "px";
 				}
 				// is SHOWING
-				//if(a==1)console.log(child.id,endPer);
+				if(a==2)console.log(cpos,show,end,endPer);
 				if (show <= cpos && cpos<=end && this.scrollPositionPrevious<=this.scrollPosition) {
 					if (this.currentIndex != a) {
 						this.currentIndex = a;
