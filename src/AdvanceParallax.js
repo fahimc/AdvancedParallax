@@ -129,7 +129,7 @@ var AdvancedParallaxJS = {
 				if(show>0 && showPer<=1 )child.style.top =  ((Utensil.stageHeight() * a)-(Utensil.stageHeight() * a)*showPer)+"px";
 				// if(endPer>1)child.style.top =  (Utensil.stageHeight())-(child.clientHeight *endPer )+"px";
 				if(endPer>1)child.style.top =  ((Utensil.stageHeight() * a)-(Utensil.stageHeight() * a)*endPer)+"px";
-				console.log(child.className,show,cpos);
+				if(showPer>=1)console.log(child.className,showPer);
 				
 			}
 		}
