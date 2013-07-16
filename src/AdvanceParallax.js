@@ -136,7 +136,7 @@ if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJ
 	moveView : function() {
 		//current position
 		var cpos = this.currentScrollPercentage() * 100;
-
+		
 		for (var a = 0; a < this.children.length; a++) {
 			var child = this.children[a];
 			if (child.getAttribute && child.getAttribute("in")) {
@@ -144,26 +144,46 @@ if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJ
 				var end = Number(child.getAttribute("out")) * 100;
 				var showPer = ((show - (show - cpos)) / show);
 				var endPer = ((end - (end - cpos)) / end);
+				//work out percentage when scrolling
+				var insidePercentage = (cpos - (show))/(end-show);
+				var viewPercentage = (cpos/show);
+				
 				// if(child.className=="green")
 				// {
 				// console.log(child.className,cpos,showPer);
 				// console.log(Utensil.stageHeight(),(Utensil.stageHeight() * a),(Utensil.stageHeight() * a)-(Utensil.stageHeight() * a)*showPer);
 				// }
 				// if(show>0 && showPer<=1 )child.style.top =  (Utensil.stageHeight() * a)-(child.clientHeight *showPer )+"px";
-				if (show > 0 && showPer <= 1) {
-					child.style.top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1)) * showPer) + "px";
+				var top =0;
+				if (viewPercentage > 0 && viewPercentage <= 1) {
+					// child.style.top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1)) * showPer) + "px";
+					top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1))   * viewPercentage);
+					
+					child.style.top =  top+ "px";
+					
 				} else if (show == 0) {
-					child.style.top = (Utensil.stageHeight() * 0.001) + "px";
+					top =  (Utensil.stageHeight() * 0.001) ;
+					child.style.top =top + "px";
 				}
 				// if(endPer>1)child.style.top =  (Utensil.stageHeight())-(child.clientHeight *endPer )+"px";
 				
-				if (endPer > 1 && show > 0) {
-					child.style.top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1)) * endPer) + "px";
-				} else if (show == 0 && endPer > 1) {
-					child.style.top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1)) * endPer) + "px";
+				if (endPer >= 1 && show > 0) {
+					top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1)) * endPer);
+					
+					child.style.top =  top + "px";
+				} else if (show == 0 && endPer >= 1) {
+					top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1)) * endPer)
+					child.style.top = top + "px";
 				}
+				
+				
+				// console.log(sub);
 				// is SHOWING
-				if(a==2)console.log(cpos,show,end,endPer);
+				if(a==2)
+				{
+					console.log(viewPercentage);
+					console.log("position",Utensil.stageHeight() -(Utensil.stageHeight()  * viewPercentage) );
+				}
 				if (show <= cpos && cpos<=end && this.scrollPositionPrevious<=this.scrollPosition) {
 					if (this.currentIndex != a) {
 						this.currentIndex = a;
@@ -173,7 +193,7 @@ if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJ
 						});
 					}
 					this.dispatchEvents(this.events.ON_VIEW_SCROLL_DOWN, child.id, {
-						percentage : endPer.toFixed(2)
+						percentage : insidePercentage.toFixed(2)
 					});
 
 				}
@@ -181,10 +201,11 @@ if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJ
 				//if(a==1)console.log(showPer,this.scrollPositionPrevious,this.scrollPosition);
 				if (showPer >= 1  && endPer <=1 && this.scrollPositionPrevious>this.scrollPosition) {
 					this.dispatchEvents(this.events.ON_VIEW_SCROLL_UP, child.id, {
-						percentage : endPer.toFixed(2)
+						percentage : insidePercentage.toFixed(2)
 					});
 
 				}
+				
 
 			}
 		}
