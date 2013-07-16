@@ -25,6 +25,7 @@ body,html
 {
 	color:#fff;
 	background:url(../image/intro_1.jpg) center center #f00;
+	background-position-y: -300px;
 }
 #parallaxHolder .red h1
 {
@@ -55,7 +56,7 @@ body,html
 #victoria
 {
 	position:absolute;
-	background:url(../image/1.png) center center;
+	background:url(../image/1.png) no-repeat center center;
 	width: 520px;
 	height:100%;
 	top:100px;

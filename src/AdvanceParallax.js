@@ -30,7 +30,9 @@ var AdvancedParallaxJS = {
 			Utensil.addListener(window, "resize", function() {
 				root.resize();
 			});
-			document.body.ondragstart=function(e){return false;};
+			document.body.ondragstart = function(e) {
+				return false;
+			};
 			this.resize();
 		}
 	},
@@ -118,14 +120,17 @@ var AdvancedParallaxJS = {
 		this.scrollPosition -= delta > 0 ? 10 : -10;
 		if (this.scrollPosition < 0)
 			this.scrollPosition = 0;
-		if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight)AdvancedParallaxJS.scrollPosition= Utensil.stageHeight();
+		if (AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight)
+			AdvancedParallaxJS.scrollPosition = Utensil.stageHeight();
 		this.moveHandle();
 	},
 	scrollerMouseMove : function(event) {
 		AdvancedParallaxJS.scrollPositionPrevious = AdvancedParallaxJS.scrollPosition;
 		AdvancedParallaxJS.scrollPosition = Utensil.mouseY(document.body, event);
-		if(AdvancedParallaxJS.scrollPosition <0)AdvancedParallaxJS.scrollPosition=0;
-if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight)AdvancedParallaxJS.scrollPosition= Utensil.stageHeight() ;
+		if (AdvancedParallaxJS.scrollPosition < 0)
+			AdvancedParallaxJS.scrollPosition = 0;
+		if (AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight)
+			AdvancedParallaxJS.scrollPosition = Utensil.stageHeight();
 		AdvancedParallaxJS.moveHandle();
 
 	},
@@ -135,85 +140,61 @@ if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJ
 	},
 	moveView : function() {
 		//current position
-		var cpos = this.currentScrollPercentage() * 100;
+		var cpos = this.currentScrollPercentage();
+		var out = Number(this.children[this.currentIndex].getAttribute("out"));
+		var inVal = Number(this.children[this.currentIndex].getAttribute("in"));
+		var viewPercentage = ((cpos * 100) / (out * 100));
+		var insidePercentage = (cpos - (inVal))/(out-inVal);
+		var top=0;
+		if (out <= cpos && this.scrollPosition >= this.scrollPositionPrevious || this.scrollPosition < this.scrollPositionPrevious)
+		{
+			TweenLite.killTweensOf(this.holder);
+			top=((this.holder.clientHeight - Utensil.stageHeight()) * (cpos));
+		TweenLite.to(this.holder,0.2,{css:{top:-top + "px"}});
+			// this.holder.style.top = -((this.holder.clientHeight - Utensil.stageHeight()) * (cpos)) + "px";
+			
+		}
 		
-		for (var a = 0; a < this.children.length; a++) {
-			var child = this.children[a];
-			if (child.getAttribute && child.getAttribute("in")) {
-				var show = Number(child.getAttribute("in")) * 100;
-				var end = Number(child.getAttribute("out")) * 100;
-				var showPer = ((show - (show - cpos)) / show);
-				var endPer = ((end - (end - cpos)) / end);
-				//work out percentage when scrolling
-				var insidePercentage = (cpos - (show))/(end-show);
-				var viewPercentage = (cpos/show);
-				
-				// if(child.className=="green")
-				// {
-				// console.log(child.className,cpos,showPer);
-				// console.log(Utensil.stageHeight(),(Utensil.stageHeight() * a),(Utensil.stageHeight() * a)-(Utensil.stageHeight() * a)*showPer);
-				// }
-				// if(show>0 && showPer<=1 )child.style.top =  (Utensil.stageHeight() * a)-(child.clientHeight *showPer )+"px";
-				var top =0;
-				if (viewPercentage > 0 && viewPercentage <= 1) {
-					// child.style.top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1)) * showPer) + "px";
-					top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1))   * viewPercentage);
-					
-					child.style.top =  top+ "px";
-					
-				} else if (show == 0) {
-					top =  (Utensil.stageHeight() * 0.001) ;
-					child.style.top =top + "px";
-				}
-				// if(endPer>1)child.style.top =  (Utensil.stageHeight())-(child.clientHeight *endPer )+"px";
-				
-				if (endPer >= 1 && show > 0) {
-					top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1)) * endPer);
-					
-					child.style.top =  top + "px";
-				} else if (show == 0 && endPer >= 1) {
-					top = ((Utensil.stageHeight() * (a+1)) - (Utensil.stageHeight() * (a+1)) * endPer)
-					child.style.top = top + "px";
-				}
-				
-				
-				// console.log(sub);
-				// is SHOWING
-				if(a==2)
-				{
-					console.log(viewPercentage);
-					console.log("position",Utensil.stageHeight() -(Utensil.stageHeight()  * viewPercentage) );
-				}
-				if (show <= cpos && cpos<=end && this.scrollPositionPrevious<=this.scrollPosition) {
-					if (this.currentIndex != a) {
-						this.currentIndex = a;
-						this.dispatchEvents(this.events.ON_VIEW_CHANGE,this.id.parallaxHolder, {
-							targetID : child.id,
+		var viewChanged = this.updatePageIndex();
+		
+		if (insidePercentage>=0 && insidePercentage<=1 ) {
+			this.dispatchEvents(this.events.ON_VIEW_SCROLL_DOWN, this.children[this.currentIndex].id, {
+						percentage : insidePercentage.toFixed(2)
+			});
+		}
+		//dispatch on scroll out
+		if(this.scrollPosition < this.scrollPositionPrevious)
+		{
+			
+			var ctop = Utensil.stageHeight() * (this.currentIndex);
+			insidePercentage=((ctop-top)/Utensil.stageHeight());
+			//insidePercentage = (cpos -inVal)/(cpos);
+			if(insidePercentage<0)viewPercentage=0;
+			if(insidePercentage>1)viewPercentage=1;
+			this.dispatchEvents(this.events.ON_VIEW_SCROLL_UP, this.children[this.currentIndex].id, {
+						percentage : insidePercentage.toFixed(2)
+			});
+		}
+	},
+	updatePageIndex : function() {
+		var previous = this.currentIndex;
+		this.currentIndex = parseInt(Math.abs(Number(this.holder.style.top.replace("px", ""))) / Utensil.stageHeight());
+
+		if (previous != this.currentIndex)
+		{
+			this.dispatchEvents(this.events.ON_VIEW_CHANGE,this.id.parallaxHolder, {
+							targetID : this.id.parallaxHolder,
 							index:this.currentIndex
 						});
-					}
-					this.dispatchEvents(this.events.ON_VIEW_SCROLL_DOWN, child.id, {
-						percentage : insidePercentage.toFixed(2)
-					});
-
-				}
-				// going off screen
-				//if(a==1)console.log(showPer,this.scrollPositionPrevious,this.scrollPosition);
-				if (showPer >= 1  && endPer <=1 && this.scrollPositionPrevious>this.scrollPosition) {
-					this.dispatchEvents(this.events.ON_VIEW_SCROLL_UP, child.id, {
-						percentage : insidePercentage.toFixed(2)
-					});
-
-				}
-				
-
-			}
+			this.children[this.currentIndex].setAttribute("in",this.currentScrollPercentage());
+			return true;
 		}
-		//this.children[this.currentIndex].style.top = -(this.children[this.currentIndex].clientHeight *per )+"px";
+			
+		return false;
 	},
 	dispatchEvents : function(eventName, viewID, parameters) {
-		
-		if (!this.callbacks[eventName][viewID])
+
+		if (!this.callbacks[eventName] ||!this.callbacks[eventName][viewID])
 			return;
 		for (var a = 0; a < this.callbacks[eventName][viewID].length; a++) {
 
@@ -223,25 +204,27 @@ if(AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJ
 	},
 	setChildren : function(add) {
 		var count = 0;
+		var previousOut = 0;
 		for (var a = 0; a < this.holder.childNodes.length; a++) {
 			var child = this.holder.childNodes[a];
 			if (child.tagName && child.tagName == "DIV") {
-
+				child.setAttribute("in", previousOut);
 				child.style.width = (Utensil.stageWidth() - this.scrollbarWidth) + "px";
-				child.style.position = "absolute";
+				//child.style.position = "absolute";
 				child.style.overflow = "hidden";
-				child.style.top = ((count == 0) ? 0 : Utensil.stageHeight()) + "px";
+				//child.style.top = ((count == 0) ? 0 : Utensil.stageHeight()) + "px";
 				//child.style.zIndex = this.holder.childNodes.length - a;
 				child.style.height = Utensil.stageHeight() + "px";
 				if (add)
 					this.children.push(child);
 				count++;
+				previousOut = child.getAttribute("out");
 			}
 		}
 	},
 	setHolder : function() {
 		this.holder.style.width = "100%";
-		this.holder.style.height = "100%";
+		//this.holder.style.height = "100%";
 		this.holder.style.position = "relative";
 		// this.holder.style.height = (this.children.length * Utensil.stageHeight()) + "px";
 
