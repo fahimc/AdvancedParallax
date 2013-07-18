@@ -10,18 +10,19 @@
 
 	function onLoad() {
 		AdvancedParallaxJS.init();
-		AdvancedParallaxJS.addListener("view1",AdvancedParallaxJS.events.ON_VIEW_SCROLL_DOWN,onView1Move);
-		// AdvancedParallaxJS.addListener("view1",AdvancedParallaxJS.events.ON_VIEW_SCROLL_UP,onView1Move);
+		AdvancedParallaxJS.addListener("view1",AdvancedParallaxJS.events.ON_VIEW_SCROLL_IN,onView1Move);
+		// AdvancedParallaxJS.addListener("view1",AdvancedParallaxJS.events.ON_VIEW_SCROLL_OUT,onView1Move);
 		
-		AdvancedParallaxJS.addListener("view2",AdvancedParallaxJS.events.ON_VIEW_SCROLL_DOWN,onView2Move);
-		// AdvancedParallaxJS.addListener("view2",AdvancedParallaxJS.events.ON_VIEW_SCROLL_UP,onView2Move);
+		AdvancedParallaxJS.addListener("view2",AdvancedParallaxJS.events.ON_VIEW_SCROLL_IN,onView2Move);
+		// AdvancedParallaxJS.addListener("view2",AdvancedParallaxJS.events.ON_VIEW_SCROLL_OUT,onView2Move);
 		
 		// AdvancedParallaxJS.addListener("view0",AdvancedParallaxJS.events.ON_VIEW_SCROLL_DOWN,onView0Move);
-		AdvancedParallaxJS.addListener("view0",AdvancedParallaxJS.events.ON_VIEW_SCROLL_DOWN,onView0MoveIn);
-		AdvancedParallaxJS.addListener("view0",AdvancedParallaxJS.events.ON_VIEW_SCROLL_UP,onView0MoveOut);
+		AdvancedParallaxJS.addListener("view0",AdvancedParallaxJS.events.ON_VIEW_SCROLL_IN,onView0MoveIn);
+		AdvancedParallaxJS.addListener("view0",AdvancedParallaxJS.events.ON_VIEW_SCROLL_OUT,onView0MoveOut);
 		AdvancedParallaxJS.addListener("parallaxHolder",AdvancedParallaxJS.events.ON_VIEW_CHANGE,onViewChange);
 		// AdvancedParallaxJS.setView(0,{delay:10})
-		
+		AdvancedParallaxJS.setScrollerState("disable");
+		AdvancedParallaxJS.setScrollerState("enable");
 	};
 	
 	function onView1Move(event)
@@ -44,7 +45,7 @@
 	}
 	function onView0MoveOut(event)
 	{
-		console.log("onView0MoveOut",event.percentage);
+		
 		var box = document.getElementById("heading1");
 		var view = document.getElementById("view0");
 		TweenLite.to(box,0.5,{css:{top: -(100 * event.percentage)}});
@@ -60,7 +61,7 @@
 	}
 	function onViewChange(event)
 	{
-		//console.log(event);
+		console.log(AdvancedParallaxJS.currentIndex);
 	}
 	Main();
 }

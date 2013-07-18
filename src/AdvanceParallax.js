@@ -12,18 +12,48 @@ var AdvancedParallaxJS = {
 		parallaxHolder : "parallaxHolder"
 	},
 	events : {
-		ON_VIEW_SCROLL_DOWN : "ON_VIEW_SCROLL_DOWN",
-		ON_VIEW_SCROLL_UP : "ON_VIEW_SCROLL_UP",
+		ON_VIEW_SCROLL_IN : "ON_VIEW_SCROLL_IN",
+		ON_VIEW_SCROLL_OUT : "ON_VIEW_SCROLL_OUT",
 		ON_VIEW_CHANGE : "ON_VIEW_CHANGE"
 	},
+	classNames : {
+		scroller : "scroller",
+		scrollerHandle : "scrollerhandle"
+	},
+	states : {
+		scroller : {
+			state : "enable",
+			DISABLED : "disable",
+			ENABLED : "enable"
+		}
+	},
+	handlers : [],
 	callbacks : [],
 	currentIndex : 0,
 	children : [],
+	mousewheelevt : ((/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel"),
 	init : function() {
 
-		this.holder = document.getElementById(this.id.parallaxHolder)
+		this.holder = document.getElementById(this.id.parallaxHolder);
+
+		//set handlers
+		var root = this;
+
+		this.handlers["mousedown"] = function(event) {
+			root.scrollerMouseDown(event);
+		};
+
+		this.handlers["mouseout"] = function(event) {
+			root.mouseLeave(event);
+		};
+
+		this.handlers["mousewheel"] = function(event) {
+			root.mouseWheel(event);
+		}
+		//set page
 		if (this.holder) {
 			this.createScroller();
+			this.addScrollerListeners();
 			this.setChildren(true);
 			this.setHolder();
 			var root = this;
@@ -34,7 +64,9 @@ var AdvancedParallaxJS = {
 				return false;
 			};
 			this.resize();
+
 		}
+
 	},
 	createScroller : function() {
 		document.body.style.overflow = "hidden";
@@ -46,7 +78,7 @@ var AdvancedParallaxJS = {
 		this.scrollbar.style.width = this.scrollbarWidth + "px";
 		this.scrollbar.style.height = "100%";
 		this.scrollbar.style.zIndex = "998";
-		this.scrollbar.className = "scroller";
+		this.scrollbar.className = this.classNames.scroller;
 		document.body.appendChild(this.scrollbar);
 
 		this.scrollhandle = document.createElement("div");
@@ -55,30 +87,50 @@ var AdvancedParallaxJS = {
 		this.scrollhandle.style.width = this.scrollbarWidth + "px";
 		this.scrollhandle.style.height = this.scrollhandleHeight + "px";
 		this.scrollhandle.style.zIndex = "999";
-		this.scrollhandle.className = "scrollerhandle";
+		this.scrollhandle.className = this.classNames.scrollerHandle;
 
 		this.scrollbar.appendChild(this.scrollhandle);
 
-		var root = this;
-		Utensil.addListener(this.scrollbar, "mousedown", function(event) {
-			root.scrollerMouseDown(event);
-		});
-		Utensil.addListener(document, "mouseout", function(event) {
-			root.mouseLeave(event);
-		});
+	},
+	addScrollerListeners : function() {
 
-		//mousewheel
-		var mousewheelevt = (/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel"//FF doesn't recognize mousewheel as of FF3.x
+		Utensil.addListener(this.scrollbar, "mousedown", this.handlers["mousedown"]);
+		Utensil.addListener(document, "mouseout", this.handlers["mouseout"]);
 
 		if (document.attachEvent)//if IE (and Opera depending on user setting)
-			document.attachEvent("on" + mousewheelevt, function(event) {
-				root.mouseWheel(event);
-			});
+			document.attachEvent("on" + this.mousewheelevt, this.handlers["mousewheel"]);
 		else if (document.addEventListener)//WC3 browsers
-			document.addEventListener(mousewheelevt, function(event) {
-				root.mouseWheel(event);
-			}, false);
+			document.addEventListener(this.mousewheelevt, this.handlers["mousewheel"], false);
+	},
+	removeScrollerListeners : function() {
 
+		Utensil.removeListener(this.scrollbar, "mousedown", this.handlers["mousedown"]);
+		Utensil.removeListener(document, "mouseout", this.handlers["mouseout"]);
+
+		if (document.detachEvent)//if IE (and Opera depending on user setting)
+			document.detachEvent("on" + this.mousewheelevt, this.handlers["mousewheel"]);
+		else {
+			document.removeEventListener(this.mousewheelevt, this.handlers["mousewheel"]);
+		}
+	},
+	setScrollerState : function(state) {
+		if (this.states.scroller.state == state)
+			return;
+		switch(state) {
+			case this.states.scroller.DISABLED:
+				this.disableScroller();
+				break;
+			case this.states.scroller.ENABLED:
+				this.enableScroller();
+				break;
+		}
+		this.states.scroller.state = state;
+	},
+	disableScroller : function() {
+		this.removeScrollerListeners();
+	},
+	enableScroller : function() {
+		this.addScrollerListeners();
 	},
 	addListener : function(viewID, eventName, callback) {
 		if (!this.callbacks[eventName])
@@ -116,13 +168,21 @@ var AdvancedParallaxJS = {
 	mouseWheel : function(event) {
 
 		var delta = event.detail ? event.detail * (-120) : event.wheelDelta//check for detail first so Opera uses that instead of wheelDelta
-		this.scrollPositionPrevious = this.scrollPosition;
-		this.scrollPosition -= delta > 0 ? 10 : -10;
-		if (this.scrollPosition < 0)
-			this.scrollPosition = 0;
-		if (AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight)
-			AdvancedParallaxJS.scrollPosition = Utensil.stageHeight();
-		this.moveHandle();
+		var movement = (Utensil.stageHeight() * 0.01);
+		var move = AdvancedParallaxJS.scrollPosition - (delta > 0 ? movement : -movement);
+		var endPoint = Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight;
+		if (move < 0)
+			move = 0;
+		if (move > endPoint && AdvancedParallaxJS.scrollPositionPrevious <= move)
+			move = Utensil.stageHeight();
+
+		AdvancedParallaxJS.scrollPositionPrevious = AdvancedParallaxJS.scrollPosition;
+		AdvancedParallaxJS.scrollPosition = move;
+		AdvancedParallaxJS.moveHandle();
+
+		if (event.preventDefault)
+			event.preventDefault();
+		return false;
 	},
 	scrollerMouseMove : function(event) {
 		AdvancedParallaxJS.scrollPositionPrevious = AdvancedParallaxJS.scrollPosition;
@@ -144,35 +204,51 @@ var AdvancedParallaxJS = {
 		var out = Number(this.children[this.currentIndex].getAttribute("out"));
 		var inVal = Number(this.children[this.currentIndex].getAttribute("in"));
 		var viewPercentage = ((cpos * 100) / (out * 100));
-		var insidePercentage = (cpos - (inVal))/(out-inVal);
-		var top=0;
-		if (out <= cpos && this.scrollPosition >= this.scrollPositionPrevious || this.scrollPosition < this.scrollPositionPrevious)
-		{
+		var insidePercentage = (cpos - (inVal)) / (out - inVal);
+		var top = 0;
+		if (out <= cpos && this.scrollPosition >= this.scrollPositionPrevious || this.scrollPosition < this.scrollPositionPrevious) {
 			TweenLite.killTweensOf(this.holder);
-			top=((this.holder.clientHeight - Utensil.stageHeight()) * (cpos));
-		TweenLite.to(this.holder,0.2,{css:{top:-top + "px"}});
-			// this.holder.style.top = -((this.holder.clientHeight - Utensil.stageHeight()) * (cpos)) + "px";
+			top = ((this.holder.clientHeight - Utensil.stageHeight()) * (cpos));
+			TweenLite.to(this.holder, 0.2, {
+				css : {
+					top : -top + "px"
+				}
+			});
+
+		}else{
+			
+			TweenLite.killTweensOf(this.holder);
+			TweenLite.to(this.holder, 0.1, {
+				css : {
+					top : -(Utensil.stageHeight() * this.currentIndex)+"px"
+				}
+			});
 			
 		}
-		
+
 		var viewChanged = this.updatePageIndex();
-		
-		if (insidePercentage>=0 && insidePercentage<=1 ) {
-			this.dispatchEvents(this.events.ON_VIEW_SCROLL_DOWN, this.children[this.currentIndex].id, {
-						percentage : insidePercentage.toFixed(2)
+		//dispatch on scroll in
+		if (insidePercentage >= 0 && insidePercentage <= 1) {
+			this.dispatchEvents(this.events.ON_VIEW_SCROLL_IN, this.children[this.currentIndex].id, {
+				percentage : insidePercentage.toFixed(2),
+				outPercentage : out,
+				inPercentage : inVal
 			});
 		}
 		//dispatch on scroll out
-		if(this.scrollPosition < this.scrollPositionPrevious)
-		{
-			
+		if (this.scrollPosition < this.scrollPositionPrevious) {
+
 			var ctop = Utensil.stageHeight() * (this.currentIndex);
-			insidePercentage=((ctop-top)/Utensil.stageHeight());
-			//insidePercentage = (cpos -inVal)/(cpos);
-			if(insidePercentage<0)viewPercentage=0;
-			if(insidePercentage>1)viewPercentage=1;
-			this.dispatchEvents(this.events.ON_VIEW_SCROLL_UP, this.children[this.currentIndex].id, {
-						percentage : insidePercentage.toFixed(2)
+			insidePercentage = ((ctop - top) / Utensil.stageHeight());
+
+			if (insidePercentage < 0)
+				viewPercentage = 0;
+			if (insidePercentage > 1)
+				viewPercentage = 1;
+			this.dispatchEvents(this.events.ON_VIEW_SCROLL_OUT, this.children[this.currentIndex].id, {
+				percentage : insidePercentage.toFixed(2),
+				outPercentage : out,
+				inPercentage : inVal
 			});
 		}
 	},
@@ -180,21 +256,20 @@ var AdvancedParallaxJS = {
 		var previous = this.currentIndex;
 		this.currentIndex = parseInt(Math.abs(Number(this.holder.style.top.replace("px", ""))) / Utensil.stageHeight());
 
-		if (previous != this.currentIndex)
-		{
-			this.dispatchEvents(this.events.ON_VIEW_CHANGE,this.id.parallaxHolder, {
-							targetID : this.id.parallaxHolder,
-							index:this.currentIndex
-						});
-			this.children[this.currentIndex].setAttribute("in",this.currentScrollPercentage());
+		if (previous != this.currentIndex) {
+			this.dispatchEvents(this.events.ON_VIEW_CHANGE, this.id.parallaxHolder, {
+				targetID : this.id.parallaxHolder,
+				index : this.currentIndex
+			});
+			this.children[this.currentIndex].setAttribute("in", this.currentScrollPercentage());
 			return true;
 		}
-			
+
 		return false;
 	},
 	dispatchEvents : function(eventName, viewID, parameters) {
 
-		if (!this.callbacks[eventName] ||!this.callbacks[eventName][viewID])
+		if (!this.callbacks[eventName] || !this.callbacks[eventName][viewID])
 			return;
 		for (var a = 0; a < this.callbacks[eventName][viewID].length; a++) {
 
@@ -210,10 +285,7 @@ var AdvancedParallaxJS = {
 			if (child.tagName && child.tagName == "DIV") {
 				child.setAttribute("in", previousOut);
 				child.style.width = (Utensil.stageWidth() - this.scrollbarWidth) + "px";
-				//child.style.position = "absolute";
 				child.style.overflow = "hidden";
-				//child.style.top = ((count == 0) ? 0 : Utensil.stageHeight()) + "px";
-				//child.style.zIndex = this.holder.childNodes.length - a;
 				child.style.height = Utensil.stageHeight() + "px";
 				if (add)
 					this.children.push(child);
@@ -224,9 +296,7 @@ var AdvancedParallaxJS = {
 	},
 	setHolder : function() {
 		this.holder.style.width = "100%";
-		//this.holder.style.height = "100%";
 		this.holder.style.position = "relative";
-		// this.holder.style.height = (this.children.length * Utensil.stageHeight()) + "px";
 
 	},
 
