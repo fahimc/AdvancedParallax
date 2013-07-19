@@ -23,7 +23,7 @@
 		// AdvancedParallaxJS.setView(0,{delay:10})
 		AdvancedParallaxJS.setScrollerState("disable");
 		AdvancedParallaxJS.setScrollerState("enable");
-		
+
 		
 		AdvancedParallaxJS.navigateTo(3,10);
 		setTimeout(function()
@@ -32,6 +32,7 @@
 			AdvancedParallaxJS.navigateTo(1,10);
 		},3000);
 		
+
 	};
 	
 	function onView1Move(event)
