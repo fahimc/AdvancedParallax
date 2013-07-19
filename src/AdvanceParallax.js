@@ -5,9 +5,9 @@ var AdvancedParallaxJS = {
 	scrollbarWidth : 20,
 	scrollPosition : 0,
 	scrollPositionPrevious : 0,
-	navigateTimer:null,
-	moveIndex:0,
-	moveDirection:0,
+	navigateTimer : null,
+	moveIndex : 0,
+	moveDirection : 0,
 	options : {
 
 	},
@@ -29,6 +29,10 @@ var AdvancedParallaxJS = {
 			DISABLED : "disable",
 			ENABLED : "enable"
 		}
+	},
+	att:
+	{
+		pageName:"data-pagename"
 	},
 	handlers : [],
 	callbacks : [],
@@ -193,8 +197,7 @@ var AdvancedParallaxJS = {
 		AdvancedParallaxJS.setScrollPosition();
 
 	},
-	setScrollPosition:function()
-	{
+	setScrollPosition : function() {
 		if (AdvancedParallaxJS.scrollPosition < 0)
 			AdvancedParallaxJS.scrollPosition = 0;
 		if (AdvancedParallaxJS.scrollPosition > Utensil.stageHeight() - AdvancedParallaxJS.scrollhandleHeight)
@@ -206,7 +209,7 @@ var AdvancedParallaxJS = {
 		this.moveView();
 	},
 	moveView : function() {
-		
+
 		//current position
 		var cpos = this.currentScrollPercentage();
 		var out = Number(this.children[this.currentIndex].getAttribute("data-out"));
@@ -223,15 +226,15 @@ var AdvancedParallaxJS = {
 				}
 			});
 
-		}else{
-			
+		} else {
+
 			TweenLite.killTweensOf(this.holder);
 			TweenLite.to(this.holder, 0.1, {
 				css : {
-					top : -(Utensil.stageHeight() * this.currentIndex)+"px"
+					top : -(Utensil.stageHeight() * this.currentIndex) + "px"
 				}
 			});
-			
+
 		}
 
 		var viewChanged = this.updatePageIndex();
@@ -241,7 +244,7 @@ var AdvancedParallaxJS = {
 				percentage : insidePercentage.toFixed(2),
 				outPercentage : out,
 				inPercentage : inVal,
-				type:this.events.ON_VIEW_SCROLL_IN
+				type : this.events.ON_VIEW_SCROLL_IN
 			});
 		}
 		//dispatch on scroll out
@@ -258,7 +261,7 @@ var AdvancedParallaxJS = {
 				percentage : insidePercentage.toFixed(2),
 				outPercentage : out,
 				inPercentage : inVal,
-				type:this.events.ON_VIEW_SCROLL_OUT
+				type : this.events.ON_VIEW_SCROLL_OUT
 			});
 		}
 	},
@@ -270,7 +273,7 @@ var AdvancedParallaxJS = {
 			this.dispatchEvents(this.events.ON_VIEW_CHANGE, this.id.parallaxHolder, {
 				targetID : this.id.parallaxHolder,
 				index : this.currentIndex,
-				type:this.events.ON_VIEW_CHANGE
+				type : this.events.ON_VIEW_CHANGE
 			});
 			this.children[this.currentIndex].setAttribute("in", this.currentScrollPercentage());
 			return true;
@@ -278,41 +281,37 @@ var AdvancedParallaxJS = {
 
 		return false;
 	},
-	navigateTo:function(index,speed)
-	{
+	navigateTo : function(index, speed) {
 		this.setScrollerState("disable");
-		this.moveDirection = this.currentIndex<=index?1:-1;
-		this.moveIndex=index;
-		this.navigateTimer = setInterval(this.autoMove,speed);
+		this.moveDirection = this.currentIndex <= index ? 1 : -1;
+		this.moveIndex = index;
+		this.navigateTimer = setInterval(this.autoMove, speed);
 	},
-	autoMove:function()
-	{
-		var root =AdvancedParallaxJS;
+	autoMove : function() {
+		var root = AdvancedParallaxJS;
 		var movement = (Utensil.stageHeight() * 0.01);
-		var sp=root.scrollPosition-(root.moveDirection<0?movement:-movement);
-		var cpos=Number(sp / (Utensil.stageHeight())).toFixed(2);
-		var perOut  =Number(root.children[root.moveIndex].getAttribute("data-out"));
-		var perIn  =Number(root.children[root.moveIndex].getAttribute("in"));
-		var pos= (Utensil.stageHeight() * root.moveIndex)/root.holder.clientHeight;
-		var sper =root.scrollPosition/Utensil.stageHeight();
-		
-		if(cpos>=perOut && root.moveDirection>0||sper<=pos && root.moveDirection<0)
-		{
+		var sp = root.scrollPosition - (root.moveDirection < 0 ? movement : -movement);
+		var cpos = Number(sp / (Utensil.stageHeight())).toFixed(2);
+		var perOut = Number(root.children[root.moveIndex].getAttribute("data-out"));
+		var perIn = Number(root.children[root.moveIndex].getAttribute("in"));
+		var pos = (Utensil.stageHeight() * root.moveIndex) / root.holder.clientHeight;
+		var sper = root.scrollPosition / Utensil.stageHeight();
+
+		if (cpos >= perOut && root.moveDirection > 0 || sper <= pos && root.moveDirection < 0) {
 			root.purgeNavigateTimer();
-			if(root.moveDirection>0)
-			return;
+			if (root.moveDirection > 0)
+				return;
 			sp = pos * Utensil.stageHeight();
 		}
 		root.scrollPositionPrevious = root.scrollPosition;
 		root.scrollPosition = sp;
-		
+
 		root.setScrollPosition();
 	},
-	purgeNavigateTimer:function()
-	{
+	purgeNavigateTimer : function() {
 		clearInterval(AdvancedParallaxJS.navigateTimer);
 		AdvancedParallaxJS.setScrollerState("enable");
-		
+
 	},
 	dispatchEvents : function(eventName, viewID, parameters) {
 
@@ -331,6 +330,7 @@ var AdvancedParallaxJS = {
 			var child = this.holder.childNodes[a];
 			if (child.tagName && child.tagName == "DIV") {
 				child.setAttribute("in", previousOut);
+				child.setAttribute("data-index", a);
 				child.style.width = (Utensil.stageWidth() - this.scrollbarWidth) + "px";
 				child.style.overflow = "hidden";
 				child.style.height = Utensil.stageHeight() + "px";
@@ -340,6 +340,14 @@ var AdvancedParallaxJS = {
 				previousOut = child.getAttribute("data-out");
 			}
 		}
+	},
+	getChildIndexByName: function(id) {
+		
+		for (var a = 0; a < this.children.length; a++) {
+			if(this.children[a].getAttribute(this.att.pageName) && this.children[a].getAttribute(this.att.pageName)==id)
+			return a;
+		}
+		return null;
 	},
 	setHolder : function() {
 		this.holder.style.width = "100%";

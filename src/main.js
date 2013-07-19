@@ -24,13 +24,17 @@
 		AdvancedParallaxJS.setScrollerState("disable");
 		AdvancedParallaxJS.setScrollerState("enable");
 
+		var urlUtil = new URLUtil();
+		var deeplinkName = urlUtil.checkDeepLink();
 		
-		AdvancedParallaxJS.navigateTo(3,10);
-		setTimeout(function()
+		if(deeplinkName)
 		{
-			console.log("up");
-			AdvancedParallaxJS.navigateTo(1,10);
-		},3000);
+			var index = AdvancedParallaxJS.getChildIndexByName(deeplinkName);
+			if(index!=undefined)AdvancedParallaxJS.navigateTo(index,10);
+		}
+		
+	
+		
 		
 
 	};
@@ -71,7 +75,7 @@
 	}
 	function onViewChange(event)
 	{
-		console.log(AdvancedParallaxJS.currentIndex);
+		//console.log(AdvancedParallaxJS.currentIndex);
 	}
 	Main();
 }
