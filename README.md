@@ -21,7 +21,7 @@ Inside the **BODY** tag place a DIV with the ID set to 'parallaxHolder' then add
 
 ```
 <body>
-  	<div id="parallaxHolder">
+		<div id="parallaxHolder">
 			<div id="view0"  class="red" out="0.01" >
 				
 				
@@ -147,3 +147,29 @@ AdvancedParallaxJS.setScrollerState(state:String)
 ```
 AdvancedParallaxJS.setScrollerState("disable");
 ```
+
+##Auto Scroll to a Section
+To scroll to a particular section you can use the 'navigateTo' method. You need to provide the index of the section and the speed you wish to goto that section. You can get the child index if you have a deep link name (See getChildIndexByName method).
+
+###navigateTo parameters
+```
+AdvancedParallaxJS.navigateTo(index:Number,speed:Number);
+```
+
+## Get Section Index by Deep link Name
+You can obtain the section index if you specify a deep link name. To set a deep link name add an attribute called 'data-pagename' the a section can provide a string value as the name.
+
+Example:
+
+```
+<div id="view1" class="blue"  data-out="0.6" data-pagename="Car_Detail">   
+```  
+
+Then you can use the 'getChildIndexByName' method to obtain the index.
+
+Example:
+
+```  
+var index = AdvancedParallaxJS.getChildIndexByName('Car_Detail');
+console.log(index);
+```  
